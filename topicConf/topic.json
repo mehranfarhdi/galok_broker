@@ -1,0 +1,12 @@
+{
+  "topics":[
+    "news",
+    "technology",
+    "science",
+    "goms",
+    "golang",
+    "player.created",
+    "player.moved",
+    "object.moved"
+  ]
+}
