@@ -59,7 +59,7 @@ func (n *Notifier) sendNotif(notification *Notification) {
 	}
 }
 
-// SendMessage enqueues the request to send the message into the queue.
+// SendMessage enqueues the request to send the messagetopic into the queue.
 // Therefore the sending itself will happen a bit later because the background
 // thread will read from the queue.
 func (n *Notifier) SendMessage(connections []*net.Conn, topic, message string) {

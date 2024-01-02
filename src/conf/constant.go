@@ -1,6 +1,6 @@
 package conf
 
-// message broker config
+// messagetopic broker config
 var (
 	ip_key           = "IP_BIND"
 	protocolType_key = "PROTOCOL_TYPE"

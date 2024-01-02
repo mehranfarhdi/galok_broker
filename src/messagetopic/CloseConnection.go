@@ -1,4 +1,4 @@
-package message
+package messagetopic
 
 type CloseConnection struct {
 	MessageCode int    `json:"message_code"`

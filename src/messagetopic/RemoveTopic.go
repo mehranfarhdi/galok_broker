@@ -1,7 +1,7 @@
-package message
+package messagetopic
 
 type RemoveTopic struct {
-	MessageType int      `json:"message_type"`
+	MessageCode int      `json:"message_code"`
 	Topics      []string `json:"topics"`
 	Username    string   `json:"username"`
 	Password    string   `json:"password"`
@@ -9,7 +9,7 @@ type RemoveTopic struct {
 
 func NewRemoveTopic(messagetype int, topics []string, username, password string) RemoveTopic {
 	return RemoveTopic{
-		MessageType: messagetype,
+		MessageCode: messagetype,
 		Topics:      topics,
 		Username:    username,
 		Password:    password,
@@ -17,7 +17,7 @@ func NewRemoveTopic(messagetype int, topics []string, username, password string)
 }
 
 func (m RemoveTopic) GetMessageType() int {
-	return m.MessageType
+	return m.MessageCode
 }
 
 func (t RemoveTopic) GetTopics() []string {

@@ -59,16 +59,16 @@ func (cl *ConfigLoader) AddTopic(topicName string) {
 
 // LoadConfig read the server config from env and call loadTopic file
 func (cl *ConfigLoader) LoadConfig() error {
-	//read ip bind in message broker
+	//read ip bind in messagetopic broker
 	ipBind, err := enviroment.Load(ip_key)
 	if err != nil {
-		log.Fatalf("err to read %s from enviroment message: %s", ip_key, err)
+		log.Fatalf("err to read %s from enviroment messagetopic: %s", ip_key, err)
 		return err
 	}
 
 	portBindStr, err := enviroment.Load(port_key)
 	if err != nil {
-		log.Fatalf("err to read %s from enviroment message: %s", port_key, err)
+		log.Fatalf("err to read %s from enviroment messagetopic: %s", port_key, err)
 		return err
 	}
 
@@ -81,25 +81,25 @@ func (cl *ConfigLoader) LoadConfig() error {
 
 	protocoltype, err := enviroment.Load(protocolType_key)
 	if err != nil {
-		log.Fatalf("err to read %s from enviroment message: %s", protocolType_key, err)
+		log.Fatalf("err to read %s from enviroment messagetopic: %s", protocolType_key, err)
 		return err
 	}
 
 	//debug, err := enviroment.Load(debug_key)
 	//if err != nil {
-	//	log.Fatalf("err to read %s from enviroment message: %s", debug_key, err)
+	//	log.Fatalf("err to read %s from enviroment messagetopic: %s", debug_key, err)
 	//	return err
 	//}
-	// read rest config from message broker
+	// read rest config from messagetopic broker
 	ipRest, err := enviroment.Load(restIp_key)
 	if err != nil {
-		log.Fatalf("err to read %s from enviroment message: %s", restIp_key, err)
+		log.Fatalf("err to read %s from enviroment messagetopic: %s", restIp_key, err)
 		return err
 	}
 
 	portRestStr, err := enviroment.Load(restPort_key)
 	if err != nil {
-		log.Fatalf("err to read %s from enviroment message: %s", restPort_key, err)
+		log.Fatalf("err to read %s from enviroment messagetopic: %s", restPort_key, err)
 		return err
 	}
 
