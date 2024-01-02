@@ -2,6 +2,7 @@ package notification
 
 import (
 	"errors"
+	msg "github.com/mehranfarhdi/galok_broker/src/messagetopic"
 	"net"
 	"sync"
 )
@@ -55,7 +56,11 @@ func (n *Notifier) StartNotifier() error {
 
 func (n *Notifier) sendNotif(notification *Notification) {
 	message := msg.Message{
-		Messagetype: msg.MT_MESSAGE,
+		MessageCode: msg.MT_MESSAGE,
+		Topics:      []string{notification.Topic},
+		Data:        notification.Data,
+		Username:    "",
+		Password:    "",
 	}
 }
 
