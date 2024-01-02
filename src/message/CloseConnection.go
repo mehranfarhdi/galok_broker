@@ -1,27 +1,27 @@
 package message
 
-type CloseTopic struct {
+type CloseConnection struct {
 	MessageCode int    `json:"message_code"`
 	UserName    string `json:"username"`
 	Password    string `json:"password"`
 }
 
-func NewCloseTopic(messageCode int, username, password string) CloseTopic {
-	return CloseTopic{
+func NewCloseTopic(messageCode int, username, password string) CloseConnection {
+	return CloseConnection{
 		MessageCode: messageCode,
 		UserName:    username,
 		Password:    password,
 	}
 }
 
-func (m CloseTopic) GetMessageCode() int {
+func (m CloseConnection) GetMessageCode() int {
 	return m.MessageCode
 }
 
-func (m CloseTopic) GetUsername() string {
+func (m CloseConnection) GetUsername() string {
 	return m.UserName
 }
 
-func (m CloseTopic) GetPassword() string {
+func (m CloseConnection) GetPassword() string {
 	return m.Password
 }
