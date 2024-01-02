@@ -22,8 +22,8 @@ const (
 
 // type code from server to client ()
 const (
-	MT_MESSAGE = 205
-	MT_ERROR   = 206
+	MT_MESSAGE = 201
+	MT_ERROR   = 202
 )
 
 // Error codes
