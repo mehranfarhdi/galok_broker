@@ -11,6 +11,36 @@ import (
 	"time"
 )
 
+// Package models provides data models and database operations for user management.
+// It includes a User struct representing user data, functions for password hashing,
+// validation, and CRUD operations on user records.
+//Author : Mehran farhadi bajestani
+//Created_at : 2024-01-20
+//
+// Structs:
+//   - User: Represents a user with fields for ID, username, email, hashed password,
+//           creation time, and last update time.
+//
+// Functions:
+//   - Hash: Hashes a plain-text password using bcrypt.
+//   - VerifyPassword: Compares a hashed password with a plain-text password.
+//   - BeforeSave: Hashes the user's password before saving to the database.
+//   - Prepare: Sanitizes and prepares user data before saving to the database.
+//   - Validate: Validates user data based on the specified action (create, update, login, etc.).
+//   - SaveUser: Creates a new user record in the database.
+//   - FindAllUsers: Retrieves a list of all users from the database.
+//   - FindUserByID: Retrieves a user by ID from the database.
+//   - UpdateAUser: Updates a user's information in the database.
+//   - DeleteAUser: Deletes a user from the database.
+//
+// Dependencies:
+//   - github.com/badoux/checkmail: Used for email validation.
+//   - github.com/jinzhu/gorm: ORM library for database interactions.
+//   - golang.org/x/crypto/bcrypt: Used for password hashing.
+//
+// Note: Before using the SaveUser, UpdateAUser, and DeleteAUser functions,
+// the database connection (gorm.DB) should be provided to these functions.
+
 type User struct {
 	ID        uint32    `gorm:"primary_key;auto_increment" json:"id"`
 	Username  string    `gorm:"size:255;not null;unique" json:"username"`
@@ -146,7 +176,6 @@ func (u *User) UpdateAUser(db *gorm.DB, uid uint32) (*User, error) {
 	db = db.Debug().Model(&User{}).Where("id = ?", uid).Take(&User{}).UpdateColumns(
 		map[string]interface{}{
 			"password":   u.Password,
-			"nickname":   u.Nickname,
 			"username":   u.Username,
 			"email":      u.Email,
 			"updated_at": time.Now(),
