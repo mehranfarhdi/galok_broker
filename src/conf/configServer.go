@@ -8,10 +8,6 @@ import (
 	"strconv"
 )
 
-type TopicList struct {
-	Topics []string `json:"topics"`
-}
-
 type FiberConfig struct {
 	IpBind    string
 	PortServe int
