@@ -24,7 +24,7 @@ type MessageBrokerConfig struct {
 }
 
 type ServerConfig struct {
-	Connectors MessageBrokerConfig
+	Connectors []MessageBrokerConfig
 	FiberConf  FiberConfig
 	DebugServe bool
 }
@@ -113,10 +113,12 @@ func (cl *ConfigLoader) LoadConfig() error {
 	log.Print("read config successful")
 
 	cl.serverConfig = &ServerConfig{
-		Connectors: MessageBrokerConfig{
-			ProtocolType: protocoltype,
-			IpBind:       ipBind,
-			PortServe:    portBind,
+		Connectors: []MessageBrokerConfig{
+			{
+				ProtocolType: protocoltype,
+				IpBind:       ipBind,
+				PortServe:    portBind,
+			},
 		},
 		FiberConf: FiberConfig{
 			IpBind:    ipRest,

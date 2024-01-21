@@ -7,21 +7,38 @@ import (
 )
 
 type Listener struct {
-	typeListen       string
-	listener         net.Listener
-	initialized      bool
-	host             string
-	port             int
-	connctionChannel func(conn *net.Conn)
+	typeListen        string
+	listener          net.Listener
+	initialized       bool
+	host              string
+	port              int
+	connectionChannel func(conn *net.Conn)
 }
 
-func (l *Listener) Init(host string, initialized bool, port int, connectionChannel func(conn *net.Conn)) {
+func (l *Listener) Init(host string, port int, connectionChannel func(conn *net.Conn)) {
 	log.Printf("Init server:%s:%d\n", host, port)
 
 	l.host = host
 	l.port = port
-	l.connctionChannel = connectionChannel
+	l.connectionChannel = connectionChannel
 
+}
+
+// Run listens to the port of this service and will start the handler.
+func (l *Listener) Run() {
+	if !l.initialized {
+		log.Println("Listening Service not initialized!")
+	}
+
+	for {
+		conn, err := l.waitForConnection()
+
+		if err == nil {
+			l.connectionChannel(conn)
+		} else {
+			log.Fatalln(err.Error())
+		}
+	}
 }
 
 func (l *Listener) waitForConnection() (*net.Conn, error) {
