@@ -5,6 +5,7 @@ import (
 	"github.com/mehranfarhdi/galok_broker/src/api/auth"
 	"github.com/mehranfarhdi/galok_broker/src/api/models"
 	responses "github.com/mehranfarhdi/galok_broker/src/api/response"
+	"github.com/mehranfarhdi/galok_broker/src/api/utils/formaterror"
 	"golang.org/x/crypto/bcrypt"
 	"io/ioutil"
 	"net/http"
