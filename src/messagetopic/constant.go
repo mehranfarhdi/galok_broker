@@ -28,9 +28,9 @@ const (
 
 // Error codes
 const (
+	ERR_SEND_FAILED           = 500
 	ERR_REG_INVALID_TOPIC     = 501
 	ERR_REG_ALREDY_REGISTERED = 502
-	ERR_SEND_FAILED           = 503
-	ERR_USER_NOT_ALLOWED      = 504
-	ERR_USER_NOT_FOUND        = 505
+	ERR_USER_NOT_ALLOWED      = 503
+	ERR_USER_NOT_FOUND        = 504
 )
