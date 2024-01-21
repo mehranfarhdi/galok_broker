@@ -20,7 +20,7 @@ import (
 
 // CreateToken generates a JWT with the specified user ID and sets the expiration time.
 // It returns the signed JWT string or an error.
-func CreateToken(userId uint32) (string, error) {
+func CreateToken(userId uint32, username, email string, isAdmin bool) (string, error) {
 	claims := jwt.MapClaims{}
 
 	// set is authenticate
@@ -28,6 +28,15 @@ func CreateToken(userId uint32) (string, error) {
 
 	// set User id
 	claims["userId"] = userId
+
+	// set username in token
+	claims["username"] = username
+
+	//set email in token
+	claims["email"] = email
+
+	//set isAdmin in token
+	claims["is_admin"] = isAdmin
 
 	claims["exp_date"] = time.Now().Add(time.Hour * 1).Unix()
 	// Token expires after 1 hour

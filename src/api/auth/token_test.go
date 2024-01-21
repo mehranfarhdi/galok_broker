@@ -13,7 +13,14 @@ func TestCreateTokenAndExtractTokenID(t *testing.T) {
 
 	// Create a token for testing
 	userID := uint32(123)
-	token, err := CreateToken(userID)
+
+	username := "mohammad"
+
+	email := "mohammad@gmail.com"
+
+	isAdmin := true
+
+	token, err := CreateToken(userID, username, email, isAdmin)
 	if err != nil {
 		t.Fatalf("Error creating token: %v", err)
 	}
@@ -43,7 +50,14 @@ func TestTokenValid(t *testing.T) {
 
 	// Create a token for testing
 	userID := uint32(123)
-	token, err := CreateToken(userID)
+
+	username := "mohammad"
+
+	email := "mohammad@gmail.com"
+
+	isAdmin := true
+
+	token, err := CreateToken(userID, username, email, isAdmin)
 	if err != nil {
 		t.Fatalf("Error creating token: %v", err)
 	}
