@@ -27,6 +27,22 @@ func (server *Server) CreateUser(w http.ResponseWriter, r *http.Request) {
 		responses.ERROR(w, http.StatusUnprocessableEntity, err)
 		return
 	}
+	tokenID, err := auth.ExtractTokenID(r)
+	if err != nil {
+		responses.ERROR(w, http.StatusUnauthorized, errors.New("Unauthorized"))
+		return
+	}
+
+	u, err := user.FindUserByID(server.DB, tokenID)
+	if err != nil {
+		responses.ERROR(w, http.StatusInternalServerError, err)
+	}
+
+	//chack is user is admin
+	if u.IsAdmin != true {
+		responses.ERROR(w, http.StatusUnauthorized, errors.New("user is not admin"))
+	}
+
 	user.Prepare()
 	err = user.Validate("")
 	if err != nil {
@@ -99,6 +115,17 @@ func (server *Server) UpdateUser(w http.ResponseWriter, r *http.Request) {
 		responses.ERROR(w, http.StatusUnauthorized, errors.New("Unauthorized"))
 		return
 	}
+
+	u, err := user.FindUserByID(server.DB, tokenID)
+	if err != nil {
+		responses.ERROR(w, http.StatusInternalServerError, err)
+	}
+
+	//chack is user is admin
+	if u.IsAdmin != true {
+		responses.ERROR(w, http.StatusUnauthorized, errors.New("user is not admin"))
+	}
+
 	if tokenID != uint32(uid) {
 		responses.ERROR(w, http.StatusUnauthorized, errors.New(http.StatusText(http.StatusUnauthorized)))
 		return
@@ -134,6 +161,17 @@ func (server *Server) DeleteUser(w http.ResponseWriter, r *http.Request) {
 		responses.ERROR(w, http.StatusUnauthorized, errors.New("Unauthorized"))
 		return
 	}
+
+	u, err := user.FindUserByID(server.DB, tokenID)
+	if err != nil {
+		responses.ERROR(w, http.StatusInternalServerError, err)
+	}
+
+	//chack is user is admin
+	if u.IsAdmin != true {
+		responses.ERROR(w, http.StatusUnauthorized, errors.New("user is not admin"))
+	}
+
 	if tokenID != 0 && tokenID != uint32(uid) {
 		responses.ERROR(w, http.StatusUnauthorized, errors.New(http.StatusText(http.StatusUnauthorized)))
 		return
