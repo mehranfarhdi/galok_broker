@@ -1,6 +1,7 @@
 package connection
 
 import (
+	"github.com/jinzhu/gorm"
 	"github.com/mehranfarhdi/galok_broker/src/conf"
 	"github.com/mehranfarhdi/galok_broker/src/handler"
 	"log"
@@ -30,17 +31,17 @@ func (c *Connector) Init(topics []string) {
 }
 
 // HandleConnectionAsync creates a handler for the given connection and runs it in the background.
-func (c *Connector) HandleConnectionAsync(conn *net.Conn, config *conf.Config) {
-	go c.createAndRunHandler(conn, config)
+func (c *Connector) HandleConnectionAsync(conn *net.Conn, config *conf.Config, db *gorm.DB) {
+	go c.createAndRunHandler(conn, config, db)
 }
 
 // createAndRunHandler sets up a new connection handler by registering to its events and starts it then.
 // This should run on a new goroutine.
-func (c *Connector) createAndRunHandler(conn *net.Conn, config *conf.Config) {
+func (c *Connector) createAndRunHandler(conn *net.Conn, config *conf.Config, db *gorm.DB) {
 	log.Println("Create connection handler")
 
 	connHandler := handler.Handler{}
-	connHandler.Init(conn, config)
+	connHandler.Init(conn, config, db)
 
 	c.lock()
 	c.distributor.Add(&connHandler)

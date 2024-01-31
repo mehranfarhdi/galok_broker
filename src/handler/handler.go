@@ -4,6 +4,9 @@ import (
 	"bufio"
 	"encoding/json"
 	"fmt"
+	"github.com/jinzhu/gorm"
+	"github.com/mehranfarhdi/galok_broker/src/api/models"
+	"golang.org/x/crypto/bcrypt"
 	"log"
 	"math"
 	"net"
@@ -21,14 +24,32 @@ type Handler struct {
 	registeredTopics []string
 	SendEvent        []func(Handler, []string, string)
 	ErrorEvent       []func(*Handler, int, string)
+	DB               *gorm.DB
 }
 
 const MAX_PRINTING_LENGTH int = 80
 
 // Init initializes the handler with the given connection.
-func (h *Handler) Init(connection *net.Conn, config *conf.Config) {
+func (h *Handler) Init(connection *net.Conn, config *conf.Config, db *gorm.DB) {
 	h.connection = connection
 	h.config = config
+	h.DB = db
+}
+
+func (h *Handler) UserExist(username, password string) bool {
+	var err error
+
+	user := models.User{}
+
+	err = h.DB.Debug().Model(models.User{}).Where("username = ?", username).Take(&user).Error
+	if err != nil {
+		return false
+	}
+	err = models.VerifyPassword(user.Password, password)
+	if err != nil && err == bcrypt.ErrMismatchedHashAndPassword {
+		return false
+	}
+	return true
 }
 
 // HandleConnection starts a routine to handle registration and sending messages.
@@ -122,57 +143,91 @@ func (h *Handler) handleRegistration(message messagetopic.Message) {
 	forbiddenTopics := ""
 	alreadyRegisteredTopics := ""
 
-	for _, topic := range message.Topics {
-		//TODO create a service for this. This should later take care of different user rights
-		if !util.ContainsString(h.config.TopicList.Topics, topic) {
-			forbiddenTopics += topic + ","
-			log.Println("Clients wants to register on invalid topic (" + topic + ").")
-
-		} else if util.ContainsString(h.registeredTopics, topic) {
-			alreadyRegisteredTopics += topic + ","
-			log.Println("Client already registered on " + topic)
-
-		} else {
-			h.registeredTopics = append(h.registeredTopics, topic)
-			log.Println("Register " + topic)
-		}
-	}
-
-	// Send error message for forbidden topics and cut trailing comma
-	if len(forbiddenTopics) != 0 {
-		forbiddenTopics = strings.TrimSuffix(forbiddenTopics, ",")
-
+	exist := h.UserExist(message.Username, message.Password)
+	if exist != true {
 		for _, event := range h.ErrorEvent {
-			event(h, messagetopic.ERR_REG_INVALID_TOPIC, forbiddenTopics)
+			event(h, messagetopic.ERR_USER_NOT_FOUND, "invalid username or password")
+		}
+	} else {
+		for _, topic := range message.Topics {
+			//TODO create a service for this. This should later take care of different user rights
+			if !util.ContainsString(h.config.TopicList.Topics, topic) {
+				forbiddenTopics += topic + ","
+				log.Println("Clients wants to register on invalid topic (" + topic + ").")
+
+			} else if util.ContainsString(h.registeredTopics, topic) {
+				alreadyRegisteredTopics += topic + ","
+				log.Println("Client already registered on " + topic)
+
+			} else {
+				h.registeredTopics = append(h.registeredTopics, topic)
+				log.Println("Register " + topic)
+			}
+		}
+
+		// Send error message for forbidden topics and cut trailing comma
+		if len(forbiddenTopics) != 0 {
+			forbiddenTopics = strings.TrimSuffix(forbiddenTopics, ",")
+
+			for _, event := range h.ErrorEvent {
+				event(h, messagetopic.ERR_REG_INVALID_TOPIC, forbiddenTopics)
+			}
+		}
+
+		// Send error message for already registered topics and cut trailing comma
+		if len(alreadyRegisteredTopics) != 0 {
+			alreadyRegisteredTopics = strings.TrimSuffix(alreadyRegisteredTopics, ",")
+
+			for _, event := range h.ErrorEvent {
+				event(h, messagetopic.ERR_REG_ALREDY_REGISTERED, alreadyRegisteredTopics)
+			}
 		}
 	}
 
-	// Send error message for already registered topics and cut trailing comma
-	if len(alreadyRegisteredTopics) != 0 {
-		alreadyRegisteredTopics = strings.TrimSuffix(alreadyRegisteredTopics, ",")
-
-		for _, event := range h.ErrorEvent {
-			event(h, messagetopic.ERR_REG_ALREDY_REGISTERED, alreadyRegisteredTopics)
-		}
-	}
 }
 
 // handleSending send the given message to all clients interested in the topics specified in the message.
 func (h *Handler) handleSending(message messagetopic.Message) {
-	for _, event := range h.SendEvent {
-		event(*h, message.Topics, message.Data)
+
+	exist := h.UserExist(message.Username, message.Password)
+	if exist != true {
+		for _, event := range h.ErrorEvent {
+			event(h, messagetopic.ERR_USER_NOT_FOUND, "invalid username or password")
+		}
+	} else {
+		for _, event := range h.SendEvent {
+			event(*h, message.Topics, message.Data)
+		}
 	}
+
 }
 
 // handleLogout logs the client out.
 func (h *Handler) handleLogout(message messagetopic.Message) {
-	log.Println(fmt.Sprintf("Unsubscribe from topics %#v", message.Topics))
-	h.logout(message.Topics)
+	exist := h.UserExist(message.Username, message.Password)
+
+	if exist != true {
+		for _, event := range h.ErrorEvent {
+			event(h, messagetopic.ERR_USER_NOT_FOUND, "invalid username or password")
+		}
+	} else {
+		log.Println(fmt.Sprintf("Unsubscribe from topics %#v", message.Topics))
+		h.logout(message.Topics)
+	}
 }
 
 // handleClose logs the client out from all topics and closes the connection.
 func (h *Handler) handleClose(message messagetopic.Message) {
-	h.exit()
+	exist := h.UserExist(message.Username, message.Password)
+
+	if exist != true {
+		for _, event := range h.ErrorEvent {
+			event(h, messagetopic.ERR_USER_NOT_FOUND, "invalid username or password")
+		}
+	} else {
+		h.exit()
+
+	}
 }
 
 // exit logs the client out from all topics and closes the connection.

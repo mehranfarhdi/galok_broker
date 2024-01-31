@@ -3,6 +3,7 @@ package runtime
 import (
 	"fmt"
 	"github.com/hauke96/kingpin"
+	"github.com/jinzhu/gorm"
 	"github.com/joho/godotenv"
 	"github.com/mehranfarhdi/galok_broker/src/api/controllers"
 	"github.com/mehranfarhdi/galok_broker/src/api/seed"
@@ -10,12 +11,11 @@ import (
 	"github.com/mehranfarhdi/galok_broker/src/connection"
 	"log"
 	"net"
-	"os"
 )
 
-var server = controllers.Server{}
-
 const VERSION string = "v0.2.4"
+
+var server = controllers.Server{}
 
 var (
 	app = kingpin.New("Galok", "A simple messaging service written in go")
@@ -28,7 +28,7 @@ func init() {
 	}
 }
 
-func RunRest() {
+func RunRest(db *gorm.DB) {
 
 	var err error
 	err = godotenv.Load()
@@ -38,7 +38,7 @@ func RunRest() {
 		fmt.Println("We are getting the env values")
 	}
 
-	server.Initialize(os.Getenv("DB_DRIVER"), os.Getenv("DB_USER"), os.Getenv("DB_PASSWORD"), os.Getenv("DB_PORT"), os.Getenv("DB_HOST"), os.Getenv("DB_NAME"))
+	server.Initialize(db)
 
 	seed.Load(server.DB)
 
@@ -55,10 +55,10 @@ func configureCLI() {
 	app.VersionFlag.Short('v')
 }
 
-func startServer(config *conf.Config) {
+func startServer(config *conf.Config, db *gorm.DB) {
 	log.Println("Initialize services")
 
-	listeningServices := initConnectionService(config)
+	listeningServices := initConnectionService(config, db)
 
 	log.Println("Start connection listener")
 	for _, listeningService := range listeningServices {
@@ -75,7 +75,7 @@ func startServer(config *conf.Config) {
 }
 
 // initConnectionService creates connection services bases on the given configuration.
-func initConnectionService(config *conf.Config) []connection.Listener {
+func initConnectionService(config *conf.Config, db *gorm.DB) []connection.Listener {
 	log.Println("Initialize connection services")
 
 	amountConnectors := len(config.ServerConfig.Connectors)
@@ -89,7 +89,7 @@ func initConnectionService(config *conf.Config) []connection.Listener {
 
 		// listening service
 		newConnectionClosure := func(conn *net.Conn) {
-			connectionService.HandleConnectionAsync(conn, config)
+			connectionService.HandleConnectionAsync(conn, config, db)
 		}
 		listeningService := connection.Listener{}
 		listeningService.Init(connector.IpBind, connector.PortServe, newConnectionClosure)
@@ -98,4 +98,8 @@ func initConnectionService(config *conf.Config) []connection.Listener {
 	}
 
 	return listeningServices
+}
+
+func RunDataBase() {
+
 }

@@ -12,6 +12,15 @@ type TopicList struct {
 	Topics []string `json:"topics"`
 }
 
+type DataBaseConf struct {
+	Dbdriver   string
+	DbUser     string
+	DbPassword string
+	DbPort     string
+	DbHost     string
+	DbName     string
+}
+
 type FiberConfig struct {
 	IpBind    string
 	PortServe int
@@ -30,11 +39,13 @@ type ServerConfig struct {
 }
 
 type Config struct {
+	DataBaseConf DataBaseConf
 	TopicList    TopicList
 	ServerConfig ServerConfig
 }
 
 type ConfigLoader struct {
+	dataBaseConf *DataBaseConf
 	topicList    *TopicList
 	serverConfig *ServerConfig
 }
