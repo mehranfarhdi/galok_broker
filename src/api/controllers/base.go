@@ -19,6 +19,10 @@ type Server struct {
 	Router *mux.Router
 }
 
+//func (server *Server) Run(s string) {
+//
+//}
+
 func (server *Server) Initialize(db *gorm.DB) {
 
 	server.DB = db

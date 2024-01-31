@@ -22,8 +22,7 @@ type DataBaseConf struct {
 }
 
 type FiberConfig struct {
-	IpBind    string
-	PortServe int
+	PortServe string
 }
 
 type MessageBrokerConfig struct {
@@ -33,13 +32,14 @@ type MessageBrokerConfig struct {
 }
 
 type ServerConfig struct {
+	DBConf     DataBaseConf
 	Connectors []MessageBrokerConfig
 	FiberConf  FiberConfig
 	DebugServe bool
 }
 
 type Config struct {
-	DataBaseConf DataBaseConf
+	DBConf       DataBaseConf
 	TopicList    TopicList
 	ServerConfig ServerConfig
 }
@@ -102,11 +102,6 @@ func (cl *ConfigLoader) LoadConfig() error {
 	//	return err
 	//}
 	// read rest config from messagetopic broker
-	ipRest, err := enviroment.Load(restIp_key)
-	if err != nil {
-		log.Fatalf("err to read %s from enviroment messagetopic: %s", restIp_key, err)
-		return err
-	}
 
 	portRestStr, err := enviroment.Load(restPort_key)
 	if err != nil {
@@ -114,16 +109,47 @@ func (cl *ConfigLoader) LoadConfig() error {
 		return err
 	}
 
-	portRest, err := strconv.Atoi(portRestStr)
+	dbname, err := enviroment.Load(dbName)
 	if err != nil {
-		// Handle the error if the conversion fails
-		log.Fatalf("Error converting string to int: %s", err)
-		return err
+		log.Fatalf("err to read %s from enviroment messagetopic: %s", dbName, err)
+	}
+
+	dbdriver, err := enviroment.Load(dbDriver)
+	if err != nil {
+		log.Fatalf("err to read %s from enviroment messagetopic: %s", dbDriver, err)
+	}
+
+	dbport, err := enviroment.Load(dbPort)
+	if err != nil {
+		log.Fatalf("err to read %s from enviroment messagetopic: %s", dbDriver, err)
+	}
+
+	dbhost, err := enviroment.Load(dbHost)
+	if err != nil {
+		log.Fatalf("err to read %s from enviroment messagetopic: %s", dbDriver, err)
+	}
+
+	dbpassword, err := enviroment.Load(dbPassword)
+	if err != nil {
+		log.Fatalf("err to read %s from enviroment messagetopic: %s", dbDriver, err)
+	}
+
+	dbuser, err := enviroment.Load(dbUser)
+	if err != nil {
+		log.Fatalf("err to read %s from enviroment messagetopic: %s", dbDriver, err)
 	}
 
 	log.Print("read config successful")
 
 	cl.serverConfig = &ServerConfig{
+		DBConf: DataBaseConf{
+			Dbdriver:   dbdriver,
+			DbName:     dbname,
+			DbHost:     dbhost,
+			DbPort:     dbport,
+			DbUser:     dbuser,
+			DbPassword: dbpassword,
+		},
 		Connectors: []MessageBrokerConfig{
 			{
 				ProtocolType: protocoltype,
@@ -132,8 +158,7 @@ func (cl *ConfigLoader) LoadConfig() error {
 			},
 		},
 		FiberConf: FiberConfig{
-			IpBind:    ipRest,
-			PortServe: portRest,
+			PortServe: portRestStr,
 		},
 		DebugServe: true,
 	}
@@ -142,4 +167,12 @@ func (cl *ConfigLoader) LoadConfig() error {
 	cl.loadTopics("./topicConf/topics.json")
 
 	return nil
+}
+
+func (cl *ConfigLoader) GetConfig() Config {
+	return Config{
+		DBConf:       *cl.dataBaseConf,
+		TopicList:    *cl.topicList,
+		ServerConfig: *cl.serverConfig,
+	}
 }

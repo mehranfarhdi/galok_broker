@@ -15,6 +15,8 @@
 
 package main
 
-func main() {
+import "github.com/mehranfarhdi/galok_broker/src/runtime"
 
+func main() {
+	runtime.RunDataBaseAndConf()
 }

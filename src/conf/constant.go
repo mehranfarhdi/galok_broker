@@ -10,7 +10,16 @@ var (
 
 // rest api config
 var (
-	restIp_key    = "REST_IP"
 	restPort_key  = "REST_PORT"
 	topicFileName = "./topicConf/topics.json"
+)
+
+// data base config
+var (
+	dbDriver   = "DB_DRIVER"
+	dbUser     = "DB_USER"
+	dbPassword = "DB_PASSWORD"
+	dbPort     = "DB_PORT"
+	dbHost     = "DB_HOST"
+	dbName     = "DB_NAME"
 )

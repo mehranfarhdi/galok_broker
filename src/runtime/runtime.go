@@ -28,7 +28,7 @@ func init() {
 	}
 }
 
-func RunRest(db *gorm.DB) {
+func RunRest(db *gorm.DB, port string) {
 
 	var err error
 	err = godotenv.Load()
@@ -42,7 +42,7 @@ func RunRest(db *gorm.DB) {
 
 	seed.Load(server.DB)
 
-	server.Run(":8080")
+	server.Run(fmt.Sprintf(":%s", port))
 
 }
 
@@ -100,6 +100,18 @@ func initConnectionService(config *conf.Config, db *gorm.DB) []connection.Listen
 	return listeningServices
 }
 
-func RunDataBase() {
+func RunDataBaseAndConf() {
+
+	// get config for data base
+	configLoader := conf.ConfigLoader{}
+	configLoader.LoadConfig()
+	config := configLoader.GetConfig()
+	dataBase := conf.InitializeDB(config.DBConf.Dbdriver, config.DBConf.DbUser, config.DBConf.DbPassword, config.DBConf.DbPort, config.DBConf.DbHost, config.DBConf.DbName)
+
+	// run servers
+	RunRest(dataBase, config.ServerConfig.FiberConf.PortServe)
+
+	// message broker
+	startServer(&config, dataBase)
 
 }
