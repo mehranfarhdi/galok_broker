@@ -1,33 +1,45 @@
 package enviroment
 
 import (
-	"fmt"
 	"github.com/joho/godotenv"
-	"log"
 	"os"
+	"runtime"
 	"strings"
 )
 
+// Get will get key of environment and return value of key.
+// if value is not exist, return error
 func Load(key string) (string, error) {
-	// Try to load environment variables from the .env file
-	err := godotenv.Load(".env")
-	if err != nil {
-		// .env file not found, log a messagetopic (optional)
-		log.Println(".env file not found, reading from system environment variables.")
+	var value string
+
+	value = os.Getenv(key)
+	if strings.Compare(value, "") != 0 {
+		return value, nil
 	}
 
-	// Iterate over the system environment variables
-	for _, e := range os.Environ() {
-		pair := strings.SplitN(e, "=", 2)
-		envKey := pair[0]
-		envValue := pair[1]
+	path, err := os.Getwd()
+	if err != nil {
+		return "", err
+	}
 
-		// If the key matches, return the corresponding value
-		if envKey == key {
-			return envValue, nil
+	operationSystem := runtime.GOOS
+	switch operationSystem {
+	case "windows":
+		if err := godotenv.Load(path + "\\.env"); err != nil {
+			return "", err
+		}
+
+	case "linux":
+		if err := godotenv.Load(path + "/.env"); err != nil {
+			return "", err
 		}
 	}
 
-	// Key not found
-	return "", fmt.Errorf("key not found: %s", key)
+	value = os.Getenv(key)
+
+	if value == "" {
+		return "", nil
+	}
+
+	return value, nil
 }

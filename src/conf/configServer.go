@@ -32,7 +32,6 @@ type MessageBrokerConfig struct {
 }
 
 type ServerConfig struct {
-	DBConf     DataBaseConf
 	Connectors []MessageBrokerConfig
 	FiberConf  FiberConfig
 	DebugServe bool
@@ -139,20 +138,13 @@ func (cl *ConfigLoader) LoadConfig() error {
 		log.Fatalf("err to read %s from enviroment messagetopic: %s", dbDriver, err)
 	}
 
+	log.Println(protocoltype)
 	log.Print("read config successful")
 
 	cl.serverConfig = &ServerConfig{
-		DBConf: DataBaseConf{
-			Dbdriver:   dbdriver,
-			DbName:     dbname,
-			DbHost:     dbhost,
-			DbPort:     dbport,
-			DbUser:     dbuser,
-			DbPassword: dbpassword,
-		},
 		Connectors: []MessageBrokerConfig{
 			{
-				ProtocolType: protocoltype,
+				ProtocolType: "tcp",
 				IpBind:       ipBind,
 				PortServe:    portBind,
 			},
@@ -163,8 +155,21 @@ func (cl *ConfigLoader) LoadConfig() error {
 		DebugServe: true,
 	}
 
+	cl.dataBaseConf = &DataBaseConf{
+		Dbdriver:   dbdriver,
+		DbName:     dbname,
+		DbHost:     dbhost,
+		DbPort:     dbport,
+		DbUser:     dbuser,
+		DbPassword: dbpassword,
+	}
+
+	cl.topicList = &TopicList{
+		Topics: make([]string, 0),
+	}
+
 	//load topic conf
-	cl.loadTopics("./topicConf/topics.json")
+	//cl.loadTopics("./topicConf/topics.json")
 
 	return nil
 }

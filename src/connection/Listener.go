@@ -17,9 +17,11 @@ type Listener struct {
 
 func (l *Listener) Init(host string, port int, connectionChannel func(conn *net.Conn)) {
 	log.Printf("Init server:%s:%d\n", host, port)
-
+	l.initialized = true
+	l.typeListen = "tcp"
 	l.host = host
 	l.port = port
+	l.listen()
 	l.connectionChannel = connectionChannel
 
 }
@@ -42,6 +44,11 @@ func (l *Listener) Run() {
 }
 
 func (l *Listener) waitForConnection() (*net.Conn, error) {
+	log.Println(l.typeListen)
+	log.Println(l.host)
+	log.Println(l.initialized)
+	log.Println(l.port)
+
 	connction, err := l.listener.Accept()
 	if err != nil {
 		log.Fatalln(err.Error())

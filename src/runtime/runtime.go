@@ -11,6 +11,7 @@ import (
 	"github.com/mehranfarhdi/galok_broker/src/connection"
 	"log"
 	"net"
+	"sync"
 )
 
 const VERSION string = "v0.2.4"
@@ -80,6 +81,8 @@ func initConnectionService(config *conf.Config, db *gorm.DB) []connection.Listen
 
 	amountConnectors := len(config.ServerConfig.Connectors)
 
+	log.Println("how match:", amountConnectors)
+
 	listeningServices := make([]connection.Listener, amountConnectors)
 
 	for i, connector := range config.ServerConfig.Connectors {
@@ -101,17 +104,23 @@ func initConnectionService(config *conf.Config, db *gorm.DB) []connection.Listen
 }
 
 func RunDataBaseAndConf() {
-
 	// get config for data base
 	configLoader := conf.ConfigLoader{}
 	configLoader.LoadConfig()
 	config := configLoader.GetConfig()
 	dataBase := conf.InitializeDB(config.DBConf.Dbdriver, config.DBConf.DbUser, config.DBConf.DbPassword, config.DBConf.DbPort, config.DBConf.DbHost, config.DBConf.DbName)
 
-	// run servers
-	RunRest(dataBase, config.ServerConfig.FiberConf.PortServe)
+	// make channels to signal when each function has completed
 
-	// message broker
-	startServer(&config, dataBase)
+	var wg sync.WaitGroup
+
+	wg.Add(2)
+	go RunRest(dataBase, "8080")
+
+	go startServer(&config, dataBase)
+
+	fmt.Println("Waiting for goroutines to finish...")
+	wg.Wait()
+	fmt.Println("Done!")
 
 }
